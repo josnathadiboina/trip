@@ -158,7 +158,7 @@ document.addEventListener('DOMContentLoaded', () => {
   injectFooter();
   injectBackToTop();
 
-  // 3D Scroll Reveal
+  // 3D Engine Initialization
   setTimeout(initScrollReveal, 500);
 
   // Init 3D Mouse Parallax
@@ -214,7 +214,7 @@ function initScrollReveal() {
    3D Mouse Parallax Tilt
    ============================================================ */
 function initMouseParallax3D() {
-  var tiltElements = document.querySelectorAll('.tilt-3d, .result-item, .card, .room-card, .search-card, .offer-card, .why-card, .summary-box, .payment-option, .mode-tab, .social-icon');
+  var tiltElements = document.querySelectorAll('.tilt-card, .result-item, .card, .room-card, .search-card, .offer-card, .why-card, .summary-box, .payment-option, .mode-tab, .social-icon');
   tiltElements.forEach(function(el) {
     el.addEventListener('mousemove', function(e) {
       var rect = el.getBoundingClientRect();
@@ -222,14 +222,14 @@ function initMouseParallax3D() {
       var y = e.clientY - rect.top;
       var centerX = rect.width / 2;
       var centerY = rect.height / 2;
-      var rotateX = ((y - centerY) / centerY) * -4; // Reduced from -5 to -4
-      var rotateY = ((x - centerX) / centerX) * 4; // Reduced from 5 to 4
-      el.style.transform = 'perspective(800px) rotateX(' + rotateX + 'deg) rotateY(' + rotateY + 'deg) translateZ(10px)';
+      var rotateX = ((y - centerY) / centerY) * -5;
+      var rotateY = ((x - centerX) / centerX) * 5;
+      el.style.transform = 'perspective(1000px) rotateX(' + rotateX + 'deg) rotateY(' + rotateY + 'deg) translateZ(15px)';
       el.style.transition = 'transform 0.1s ease-out';
     });
     el.addEventListener('mouseleave', function() {
-      el.style.transform = 'perspective(800px) rotateX(0deg) rotateY(0deg) translateZ(0px)';
-      el.style.transition = 'transform 0.5s ease-out';
+      el.style.transform = 'perspective(1000px) rotateX(0deg) rotateY(0deg) translateZ(0px)';
+      el.style.transition = 'transform 0.6s cubic-bezier(0.22, 1, 0.36, 1)';
     });
   });
 }
@@ -240,28 +240,174 @@ function initMouseParallax3D() {
 function initMagneticButtons() {
   var reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   if (reduce) return;
-  var buttons = document.querySelectorAll('.btn');
+  var buttons = document.querySelectorAll('.btn, .social-icon, .mode-tab, .nav-links a');
   buttons.forEach(function(btn) {
     // Skip magnetic pull on critical booking/action buttons so they are always
     // directly clickable and never "run away" from the cursor (which made the
     // hotel "Book Now" button very hard to click).
-    if (btn.hasAttribute('data-no-magnetic') || /book|proceed|pay|confirm|continue|submit|search/i.test(btn.textContent || '')) {
-      btn.classList.add('magnetic');
+    if (btn.classList.contains('btn-primary') || btn.classList.contains('btn-secondary')) {
       return;
     }
     btn.classList.add('magnetic');
     btn.addEventListener('mousemove', function(e) {
       var rect = btn.getBoundingClientRect();
-      var relX = e.clientX - rect.left - rect.width / 2;
-      var relY = e.clientY - rect.top - rect.height / 2;
-      var pull = Math.min(6, Math.max(-6, relX * 0.15)); // Reduced pull strength
-      var pullY = Math.min(4, Math.max(-4, relY * 0.15)); // Reduced pull strength
-      btn.style.transform = 'translate(' + pull + 'px, ' + pullY + 'px) translateZ(12px)';
-      btn.style.transition = 'transform 0.15s ease-out';
+      var x = e.clientX - rect.left;
+      var y = e.clientY - rect.top;
+      var moveX = (x - rect.width / 2) * 0.3;
+      var moveY = (y - rect.height / 2) * 0.4;
+      btn.style.transform = 'translate(' + moveX + 'px, ' + moveY + 'px) translateZ(8px)';
     });
     btn.addEventListener('mouseleave', function() {
       btn.style.transform = 'translate(0, 0) translateZ(0px)';
-      btn.style.transition = 'transform 0.4s cubic-bezier(0.22, 1, 0.36, 1)';
+    });
+  });
+}
+
+/* ============================================================
+   Card Spotlight — mouse-tracking radial highlight
+   ============================================================ */
+function initCardSpotlight() {
+  var cards = document.querySelectorAll('.card, .result-item, .room-card, .offer-card, .why-card, .summary-box, .search-card');
+  cards.forEach(function(card) {
+    card.classList.add('spotlight-card');
+    card.addEventListener('mousemove', function(e) {
+      var rect = card.getBoundingClientRect();
+      var mx = ((e.clientX - rect.left) / rect.width) * 100;
+      var my = ((e.clientY - rect.top) / rect.height) * 100;
+      card.style.setProperty('--mx', mx + '%');
+      card.style.setProperty('--my', my + '%');
+    });
+  });
+}
+
+/* ============================================================
+   Floating 3D Particles — glassy bubbles rising bottom→top
+   ============================================================ */
+function initFloatingParticles() {
+  var reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  if (reduce) return;
+  if (document.getElementById('particles-3d')) return;
+  var container = document.createElement('div');
+  container.id = 'particles-3d';
+  document.body.appendChild(container);
+
+  var colors = ['rgba(255,107,74,0.5)', 'rgba(255,183,76,0.5)', 'rgba(22,48,92,0.45)', 'rgba(255,255,255,0.5)'];
+  var newColors = ['rgba(217, 70, 239, 0.4)', 'rgba(34, 211, 238, 0.4)', 'rgba(90, 58, 138, 0.4)', 'rgba(255,255,255,0.5)'];
+  var count = 18;
+  for (var i = 0; i < count; i++) {
+    var p = document.createElement('div');
+    p.className = 'particle-3d';
+    var size = 8 + Math.random() * 16;
+    var left = Math.random() * 100;
+    var dur = 8 + Math.random() * 10;
+    var delay = -Math.random() * dur;
+    var sway = (Math.random() * 60 - 30).toFixed(0) + 'px';
+    p.style.cssText = 'width:' + size + 'px;height:' + size + 'px;left:' + left + '%;' +
+      'background:radial-gradient(circle at 30% 30%, rgba(255,255,255,0.6), ' + newColors[i % newColors.length] + ' 60%, transparent);' +
+      'box-shadow:inset 0 0 8px rgba(255,255,255,0.3), 0 0 14px ' + newColors[i % newColors.length] + ';' +
+      'border:1px solid rgba(255,255,255,0.25);' +
+      '--dur:' + dur + 's;--sway:' + sway + ';animation-delay:' + delay + 's;';
+    container.appendChild(p);
+  }
+}
+
+/* ============================================================
+   Hero 3D — rotating rings + floating orbs in every hero
+   ============================================================ */
+function initHero3D() {
+  var heroes = document.querySelectorAll('header.hero');
+  heroes.forEach(function(hero) {
+    hero.style.transformStyle = 'preserve-3d';
+    // Skip if already injected
+    if (hero.querySelector('.hero-ring')) return;
+
+    // Floating orbs
+    var orbs = [
+      { size: 200, top: '12%', left: '8%', color: 'rgba(217, 70, 239, 0.16)' }, // Magenta
+      { size: 150, top: '18%', right: '12%', color: 'rgba(34, 211, 238, 0.14)' }, // Cyan
+      { size: 90, top: '60%', left: '22%', color: 'rgba(255,255,255,0.10)' } // White
+    ];
+    orbs.forEach(function(orb, idx) {
+      var div = document.createElement('div');
+      div.className = 'hero-orb';
+      div.style.cssText = 'width:' + orb.size + 'px;height:' + orb.size + 'px;' +
+        (orb.top !== undefined ? 'top:' + orb.top + ';' : '') +
+        (orb.left !== undefined ? 'left:' + orb.left + ';' : '') +
+        (orb.right !== undefined ? 'right:' + orb.right + ';' : '') +
+        'background:radial-gradient(circle,' + orb.color + ',transparent 70%);' +
+        'animation-delay:' + (idx * 1.2) + 's;';
+      hero.appendChild(div);
+    });
+
+    // Rotating rings
+    var ringSpecs = [
+      { cls: 'hero-ring-1', size: 260, top: '-60px', right: '10%' },
+      { cls: 'hero-ring-2', size: 180, top: '30%', left: '5%' },
+      { cls: 'hero-ring-3', size: 120, top: '55%', right: '22%' }
+    ];
+    ringSpecs.forEach(function(r) {
+      var ring = document.createElement('div');
+      ring.className = 'hero-ring ' + r.cls;
+      ring.style.cssText = 'width:' + r.size + 'px;height:' + r.size + 'px;' +
+        (r.top !== undefined ? 'top:' + r.top + ';' : '') +
+        (r.left !== undefined ? 'left:' + r.left + ';' : '') +
+        (r.right !== undefined ? 'right:' + r.right + ';' : '');
+      hero.appendChild(ring);
+    });
+
+    // Wrap hero inner content for 3D parallax
+    var container = hero.querySelector('.container');
+    if (container && !container.classList.contains('hero-content-3d')) {
+      container.classList.add('hero-content-3d');
+    }
+  });
+}
+
+/* ============================================================
+   Scroll-based 3D Tilt — elements rotate as they scroll
+   ============================================================ */
+function initScrollTilt3D() {
+  var reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  if (reduce) return;
+  var elements = document.querySelectorAll('.section-title, .card, .result-item, .room-card, .offer-card, .why-card, .mission-icon, .mode-tab');
+  if (!elements.length) return;
+  var observer = new IntersectionObserver(function(entries) {
+    entries.forEach(function(entry) {
+      if (entry.isIntersecting) {
+        entry.target.classList.add('scroll-tilt');
+        var rect = entry.boundingClientRect;
+        var centerY = rect.top + rect.height / 2;
+        var viewportCenter = window.innerHeight / 2;
+        var delta = (centerY - viewportCenter) / viewportCenter;
+        var tilt = Math.max(-6, Math.min(6, delta * 6));
+        entry.target.style.transform = 'perspective(900px) rotateX(' + tilt + 'deg) translateZ(8px)';
+        setTimeout(function() {
+          entry.target.style.transform = 'perspective(900px) rotateX(0deg) translateZ(0px)';
+        }, 500);
+      }
+    });
+  }, { threshold: 0.15 });
+  elements.forEach(function(el) { observer.observe(el); });
+}
+
+/* ============================================================
+   Hero Mouse Parallax — hero content follows the cursor
+   ============================================================ */
+function initHeroMouseParallax() {
+  var heroes = document.querySelectorAll('header.hero');
+  heroes.forEach(function(hero) {
+    var content = hero.querySelector('.container');
+    if (!content) return;
+    hero.addEventListener('mousemove', function(e) {
+      var rect = hero.getBoundingClientRect();
+      var x = (e.clientX - rect.left) / rect.width - 0.5;
+      var y = (e.clientY - rect.top) / rect.height - 0.5;
+      content.style.transform = 'perspective(900px) rotateY(' + (x * 6) + 'deg) rotateX(' + (-y * 6) + 'deg) translateZ(20px)';
+      content.style.transition = 'transform 0.1s ease-out';
+    });
+    hero.addEventListener('mouseleave', function() {
+      content.style.transform = 'perspective(900px) rotateY(0deg) rotateX(0deg) translateZ(0px)';
+      content.style.transition = 'transform 0.6s cubic-bezier(0.22, 1, 0.36, 1)';
     });
   });
 }

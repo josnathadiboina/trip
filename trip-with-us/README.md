@@ -22,8 +22,10 @@ Automated acceptance tests for all 6 are in `src/test/java/com/tripwithus/Featur
 ## 🔑 Login credentials
 
 **Admin (hardcoded)**
-- Username: `joo`
-- Password: `joo@123`
+```
+Username: joo
+Password: joo@123
+```
 
 **Users:** sign up from the app — no seed users are required.
 
