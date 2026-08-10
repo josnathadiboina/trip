@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Hotel Booking — TRIP-WITH-US</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body data-active="hotel.html">
+<nav class="navbar" id="siteNavbar"></nav>
+
+<header class="hero" style="padding:56px 0 100px; background:linear-gradient(135deg, #1a0a2e 0%, #0A1830 50%, #0F2444 100%); position:relative; overflow:hidden;">
+  <div style="position:absolute; inset:0; opacity:0.1; background:url('https://images.unsplash.com/photo-1566073771259-6a8506099945?w=1200') center/cover; z-index:0;"></div>
+  <div style="position:absolute; inset:0; background:linear-gradient(135deg, rgba(26,10,46,0.85) 0%, rgba(10,24,48,0.75) 100%); z-index:1;"></div>
+  <div class="container" style="position:relative; z-index:2;">
+    <span class="eyebrow">🏨 Hotel Booking</span>
+    <h1 style="font-size:32px;">Find your perfect stay</h1>
+    <div style="display:flex; gap:24px; flex-wrap:wrap; margin-top:16px; max-width:600px;">
+      <span style="display:flex; align-items:center; gap:6px; font-size:14px; color:#C6CEE0;">🏆 Verified Hotels & Resorts</span>
+      <span style="display:flex; align-items:center; gap:6px; font-size:14px; color:#C6CEE0;">🛏️ Standard, Deluxe & Suite Rooms</span>
+      <span style="display:flex; align-items:center; gap:6px; font-size:14px; color:#C6CEE0;">✅ Free Cancellation & Instant Confirmation</span>
+    </div>
+  </div>
+</header>
+
+<div class="container">
+  <div class="search-card">
+    <form class="search-form" id="searchForm" style="grid-template-columns:1fr 1fr auto;">
+      <div class="field"><label>Location</label><input type="text" id="location" placeholder="Location" required></div>
+      <div class="field"><label>Check-in Date</label><input type="date" id="travelDate" required></div>
+      <div class="field" style="align-self:end;"><button class="btn btn-primary btn-block" type="submit">Search Hotels</button></div>
+    </form>
+  </div>
+
+  <!-- Steps indicator -->
+  <div class="steps-indicator" id="stepsIndicator">
+    <span class="step-dot completed"><span class="dot"></span> Search</span>
+    <span class="step-dot" id="stepSeats"><span class="dot"></span> Select Room</span>
+    <span class="step-dot" id="stepPassenger"><span class="dot"></span> Guest Details</span>
+    <span class="step-dot" id="stepPayment"><span class="dot"></span> Payment</span>
+    <span class="step-dot" id="stepConfirm"><span class="dot"></span> Confirmation</span>
+  </div>
+
+<!-- STEP 1: Results (hotel list) -->
+  <section id="resultsSection" class="section hidden no-reveal">
+    <h3 class="mb-16">Available Hotels</h3>
+    <div id="hotelResults"></div>
+  </section>
+
+<!-- STEP 1.5: Hotel Details -->
+<section id="hotelDetailSection" class="section hidden no-reveal">
+    <button class="btn btn-outline btn-sm mb-16" onclick="backToResults()">&larr; Back to results</button>
+    <div id="hotelDetailContent"></div>
+  </section>
+
+  <!-- STEP 2: Room Selection -->
+  <section id="roomSection" class="section hidden no-reveal">
+    <button class="btn btn-outline btn-sm mb-16" style="background-color: orangered;" onclick="backToHotelResults()">&larr; Back to results</button>
+    <h3 class="mb-8" id="hotelRoomTitle"></h3>
+    <p class="muted mb-16" id="hotelRoomMeta"></p>
+    <div class="room-grid" id="roomTypeGrid"></div>
+    <div class="mt-24 flex-between">
+      <div>
+        <strong id="selectedRoomLabel">No room selected</strong>
+        <br>
+        <button class="btn btn-outline btn-sm mt-8" id="savePrefBtn" onclick="saveRoomPreference()">💾 Save Preference</button>
+      </div>
+      <button class="btn btn-primary" id="proceedToGuestBtn" disabled onclick="showGuestStep()">Continue to Guest Details</button>
+    </div>
+  </section>
+
+<!-- STEP 3: Guest Details -->
+  <section id="passengerSection" class="section hidden no-reveal">
+    <button class="btn btn-outline btn-sm mb-16" onclick="backToHotelDetail()">&larr; Back to hotel details</button>
+    <div class="grid grid-2" style="align-items:start;">
+      <div class="card">
+        <h4 class="mb-16">Guest Details</h4>
+        <div class="form-group"><label>Full Name</label><input type="text" id="guestName" required></div>
+        <div class="form-group"><label>Email</label><input type="email" id="guestEmail"></div>
+        <div class="form-group"><label>Phone</label><input type="text" id="guestPhone"></div>
+
+        <!-- CAPTCHA -->
+        <div class="form-group">
+          <label>Security Check (CAPTCHA)</label>
+          <div class="captcha-box">
+            <span class="captcha-question" id="captchaQuestion">12 + 8 = ?</span>
+            <input type="text" id="captchaInput" class="captcha-input" placeholder="?" maxlength="3">
+            <button type="button" class="captcha-refresh" onclick="generateCaptcha()" title="New question">🔄</button>
+            <p class="error-text" id="captchaMsg"></p>
+          </div>
+        </div>
+
+        <div class="form-group"><label>Coupon Code</label>
+          <div class="flex gap-8"><input type="text" id="couponCode" placeholder="e.g. WELCOME10"><button class="btn btn-outline" type="button" onclick="applyCoupon()">Apply</button></div>
+          <p class="success-text" id="couponMsg"></p>
+        </div>
+      </div>
+      <div class="summary-box">
+        <h4 class="mb-16">Fare Summary</h4>
+        <div class="summary-row"><span>Room</span><span id="sumRoom">—</span></div>
+        <div class="summary-row"><span>Base price</span><span id="sumBase">₹0</span></div>
+        <div class="summary-row"><span>Discount</span><span id="sumDiscount">-₹0</span></div>
+        <div class="summary-row total"><span>Total Payable</span><span id="sumTotal">₹0</span></div>
+        <button class="btn btn-primary btn-block mt-16" onclick="proceedToPayment()">Proceed to Payment</button>
+        <p class="error-text" id="passengerErr"></p>
+      </div>
+    </div>
+  </section>
+
+<!-- STEP 4: Payment -->
+  <section id="paymentSection" class="section hidden no-reveal">
+    <button class="btn btn-outline btn-sm mb-16" onclick="backToGuest()">&larr; Back to details</button>
+    <div class="grid grid-2" style="align-items:start;">
+      <div id="paymentMethodsContainer"></div>
+      <div class="summary-box">
+        <h4 class="mb-16">Booking Summary</h4>
+        <div class="summary-row"><span>Hotel</span><span id="payHotelInfo">—</span></div>
+        <div class="summary-row"><span>Room</span><span id="payRoomInfo">—</span></div>
+        <div class="summary-row"><span>Base price</span><span id="payBase">₹0</span></div>
+        <div class="summary-row"><span>Discount</span><span id="payDiscount">-₹0</span></div>
+        <div class="summary-row total"><span>Total Payable</span><span id="payTotal">₹0</span></div>
+      </div>
+    </div>
+  </section>
+
+<!-- STEP 5: Confirmation -->
+  <section id="confirmSection" class="section hidden text-center no-reveal">
+    <div class="card" style="max-width:480px; margin:0 auto;">
+      <h3 style="color:var(--success);">✅ Booking Confirmed!</h3>
+      <p class="muted mt-8" id="confirmMsg"></p>
+      <div class="muted mt-16" id="paymentReceipt" style="font-size:13px;"></div>
+      <a href="profile.html" class="btn btn-primary mt-16">View My Bookings</a>
+    </div>
+  </section>
+</div>
+
+
+<!-- MISSION: Plan Less. Travel More. -->
+<section class="mission-section">
+  <div class="mission-grid-bg"></div>
+  <div class="mission-inner">
+    <span class="mission-eyebrow">Our Mission</span>
+    <h2 class="mission-title">Plan Less. <span class="grad">Travel More.</span></h2>
+    <p class="mission-text">From finding the best bus routes to booking flights, reserving hotels, or renting a car, <strong>Trip With Us</strong> brings everything together on one easy-to-use platform. Our mission is to make travel planning effortless so you can enjoy every moment of your journey.</p>
+    <p class="mission-text"><strong>Trip With Us</strong> helps you compare and book buses, trains, flights, rental cars, and hotels—all in one place. Enjoy secure bookings, competitive prices, and a hassle-free travel experience every time.</p>
+    <div class="mission-icons">
+      <div class="mission-icon" title="Buses">🚌</div>
+      <div class="mission-icon" title="Trains">🚆</div>
+      <div class="mission-icon" title="Flights">✈️</div>
+      <div class="mission-icon" title="Cars">🚗</div>
+      <div class="mission-icon" title="Hotels">🏨</div>
+    </div>
+  </div>
+</section>
+
+<footer id="siteFooter"></footer>
+
+<script src="js/api.js"></script>
+<script src="js/mock-api.js"></script>
+<script src="js/common.js"></script>
+<script src="js/hotel.js"></script>
+<script>requireAuth();</script>
+</body>
+</html>
+ 

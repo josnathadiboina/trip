@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TRIP-WITH-US — Bus, Car, Train, Flight &amp; Hotel Booking</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body data-active="home.html">
+<nav class="navbar" id="siteNavbar"></nav>
+
+<header class="hero">
+  <div class="container">
+    <span class="eyebrow">India's smartest travel platform</span>
+    <h1>Go anywhere. Book everything.<br>One trip, zero hassle.</h1>
+    <p>Buses, cars, trains, flights and hotels — with live availability, dynamic pricing and instant confirmations.</p>
+  </div>
+</header>
+
+<div class="container">
+  <div class="search-card">
+    <p class="muted" style="font-size:15px; text-align:center;">Pick a travel mode above to search live availability and book in a few taps.</p>
+  </div>
+</div>
+
+<!-- Offers -->
+<section class="section">
+  <div class="container">
+    <div class="eyebrow">Limited time</div>
+    <h2 class="section-title">Offers for you</h2>
+    <p class="section-sub">Current deals and discounts, picked for your next trip</p>
+    <div class="grid grid-4" id="offersGrid">
+      <div class="card offer-card"><span class="badge">FESTIVE</span><h3>DIWALI25</h3><p>25% off on all bookings this festive season</p></div>
+      <div class="card offer-card"><span class="badge">NEW USER</span><h3>WELCOME10</h3><p>10% off on your very first booking</p></div>
+      <div class="card offer-card"><span class="badge">SEASONAL</span><h3>SUMMER15</h3><p>15% off on summer getaways</p></div>
+      <div class="card offer-card"><span class="badge">MEGA SALE</span><h3>NEWYEAR30</h3><p>30% off — New Year travel special</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- What's new -->
+<section class="section section-tight" style="background:var(--surface); border-top:1px solid var(--border); border-bottom:1px solid var(--border);">
+  <div class="container">
+    <h2 class="section-title">What's new</h2>
+    <p class="section-sub">Fresh off the runway</p>
+    <div class="grid grid-3">
+      <div class="card"><h4>Live Flight Tracking</h4><p class="muted mt-8">Track delays, gate changes and revised arrival times in real time.</p></div>
+      <div class="card"><h4>Price Freeze</h4><p class="muted mt-8">Lock today's fare for a limited window before prices move.</p></div>
+      <div class="card"><h4>Smart Recommendations</h4><p class="muted mt-8">Personalized destination picks based on what you've booked before.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- Why Choose Us -->
+<section class="section">
+  <div class="container">
+    <h2 class="section-title">Why Choose Us?</h2>
+    <p class="section-sub">Built for travelers who want speed, transparency and control</p>
+    <div class="grid grid-4">
+      <div class="card why-card"><div class="icon">⚡</div><h4>Live Availability</h4><p>Real-time seats, cars and rooms — no stale listings.</p></div>
+      <div class="card why-card"><div class="icon">💸</div><h4>Transparent Pricing</h4><p>See exactly why a price changed, with full price history.</p></div>
+      <div class="card why-card"><div class="icon">↩️</div><h4>Easy Refunds</h4><p>Automatic refund calculation and a live status tracker.</p></div>
+      <div class="card why-card"><div class="icon">🛡️</div><h4>Verified Reviews</h4><p>Moderated, genuine reviews from real travelers.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- FAQs -->
+<section class="section section-tight" style="background:var(--surface); border-top:1px solid var(--border); border-bottom:1px solid var(--border);">
+  <div class="container">
+    <h2 class="section-title">FAQs related to Bookings</h2>
+    <div class="mt-24" style="max-width:760px;">
+      <div class="faq-item">
+        <div class="faq-q" onclick="this.parentElement.classList.toggle('open')">How do I cancel a booking? <span class="chev">▾</span></div>
+        <div class="faq-a">Go to your Profile → Bookings, select the booking and choose Cancel. Refunds are calculated automatically based on our cancellation policy.</div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q" onclick="this.parentElement.classList.toggle('open')">How does dynamic pricing work? <span class="chev">▾</span></div>
+        <div class="faq-a">Prices adjust in real time based on demand, seasonality and how many seats or rooms are left. You can view the full price history on any listing.</div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q" onclick="this.parentElement.classList.toggle('open')">Can I apply a coupon at checkout? <span class="chev">▾</span></div>
+        <div class="faq-a">Yes — enter your coupon code on the payment step. It will be validated instantly and the discount applied to your total.</div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q" onclick="this.parentElement.classList.toggle('open')">How long do refunds take? <span class="chev">▾</span></div>
+        <div class="faq-a">Refunds move through Pending → Processed → Completed, typically within 5 business days. Track live status from your Profile.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Reviews -->
+<section class="section">
+  <div class="container">
+    <h2 class="section-title">Reviews</h2>
+    <p class="section-sub">What travelers are saying</p>
+    <div class="grid grid-3">
+      <div class="card">
+        <div class="review-head"><span class="reviewer">Ananya Rao</span><span class="stars">★★★★★</span></div>
+        <p class="review-text">Booked a flight and hotel together — the seat map and room preview made choosing so easy.</p>
+      </div>
+      <div class="card">
+        <div class="review-head"><span class="reviewer">Vikram Sinha</span><span class="stars">★★★★☆</span></div>
+        <p class="review-text">Loved the live flight status updates when my connecting flight got delayed. Kept me in the loop the whole way.</p>
+      </div>
+      <div class="card">
+        <div class="review-head"><span class="reviewer">Meera Nair</span><span class="stars">★★★★★</span></div>
+        <p class="review-text">Cancelled a bus ticket and the refund tracker showed exactly where my money was. Very transparent.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Popular -->
+<section class="section section-tight" style="background:var(--surface); border-top:1px solid var(--border); border-bottom:1px solid var(--border);">
+  <div class="container">
+    <div class="grid grid-3">
+      <div>
+        <h4 class="mb-16">Popular Routes</h4>
+        <p class="muted" style="line-height:2;">Delhi → Jaipur<br>Mumbai → Pune<br>Bengaluru → Chennai</p>
+      </div>
+      <div>
+        <h4 class="mb-16">Popular Cities</h4>
+        <p class="muted" style="line-height:2;">Jaipur · Goa · Mumbai<br>Bengaluru · Chennai</p>
+      </div>
+      <div>
+        <h4 class="mb-16">Popular Bus Operators</h4>
+        <p class="muted" style="line-height:2;">RoyalCruiser Travels<br>GreenLine Express<br>SkyLine Volvo</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- About / Contact -->
+<section class="section">
+  <div class="container">
+    <div class="grid grid-2">
+      <div class="card">
+        <h4 class="mb-8">About Us</h4>
+        <p class="muted">TRIP-WITH-US is India's all-in-one travel platform, bringing buses, cars, trains, flights and hotels together with live availability and honest pricing.</p>
+      </div>
+      <div class="card">
+        <h4 class="mb-8">Contact Us</h4>
+        <p class="muted">support@tripwithus.in &nbsp;•&nbsp; +91 90000 00000<br>Chennai, Tamil Nadu, India</p>
+      </div>
+    </div>
+    <div class="mt-32 flex" style="justify-content:center;">
+      <div class="social-row">
+        <a class="social-icon" href="#" title="Gmail">✉️</a>
+        <a class="social-icon" href="#" title="Facebook">f</a>
+        <a class="social-icon" href="#" title="LinkedIn">in</a>
+        <a class="social-icon" href="#" title="Twitter">𝕏</a>
+        <a class="social-icon" href="#" title="Instagram">◎</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- MISSION: Plan Less. Travel More. -->
+<section class="mission-section">
+  <div class="mission-grid-bg"></div>
+  <div class="mission-inner">
+    <span class="mission-eyebrow">Our Mission</span>
+    <h2 class="mission-title">Plan Less. <span class="grad">Travel More.</span></h2>
+    <p class="mission-text">From finding the best bus routes to booking flights, reserving hotels, or renting a car, <strong>Trip With Us</strong> brings everything together on one easy-to-use platform. Our mission is to make travel planning effortless so you can enjoy every moment of your journey.</p>
+    <p class="mission-text"><strong>Trip With Us</strong> helps you compare and book buses, trains, flights, rental cars, and hotels—all in one place. Enjoy secure bookings, competitive prices, and a hassle-free travel experience every time.</p>
+    <div class="mission-icons">
+      <div class="mission-icon" title="Buses">🚌</div>
+      <div class="mission-icon" title="Trains">🚆</div>
+      <div class="mission-icon" title="Flights">✈️</div>
+      <div class="mission-icon" title="Cars">🚗</div>
+      <div class="mission-icon" title="Hotels">🏨</div>
+    </div>
+  </div>
+</section>
+
+<footer id="siteFooter"></footer>
+
+<script src="js/api.js"></script>
+<script src="js/mock-api.js"></script>
+<script src="js/common.js"></script>
+<script>requireAuth();</script>
+</body>
+</html>
+
