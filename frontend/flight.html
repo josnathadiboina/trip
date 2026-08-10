@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TripWithUs — Flight Booking | Live Tracking</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Playfair+Display:wght@600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body data-active="flight.html">
+<nav class="navbar" id="siteNavbar"></nav>
+
+<header class="hero">
+  <div class="container">
+    <span class="eyebrow">✈️ Flight Booking</span>
+    <h1 style="font-size:32px;">Book flights at best prices</h1>
+    <div style="display:flex; gap:24px; flex-wrap:wrap; margin-top:16px; max-width:600px;">
+      <span style="display:flex; align-items:center; gap:6px; font-size:14px; color:var(--muted);">🛰️ Live Flight Tracking</span>
+      <span style="display:flex; align-items:center; gap:6px; font-size:14px; color:var(--muted);">💎 Price Freeze Available</span>
+      <span style="display:flex; align-items:center; gap:6px; font-size:14px; color:var(--muted);">🧳 15kg Check-in Baggage</span>
+    </div>
+  </div>
+</header>
+
+<div class="container">
+  <div class="search-card">
+    <form class="search-form" id="searchForm">
+      <div class="field"><label>From</label><input type="text" id="fromCity" placeholder="FROM" required></div>
+      <div class="field"><label>To</label><input type="text" id="toCity" placeholder="TO" required></div>
+      <div class="field"><label>Travel Date</label><input type="date" id="travelDate" required></div>
+      <div class="field" style="align-self:end;"><button class="btn btn-primary btn-block" type="submit">Search Flights</button></div>
+    </form>
+  </div>
+
+  <!-- Steps indicator -->
+  <div class="steps-indicator" id="stepsIndicator">
+    <span class="step-dot completed"><span class="dot"></span> Search</span>
+    <span class="step-dot" id="stepPassenger"><span class="dot"></span> Passenger Details</span>
+    <span class="step-dot" id="stepPayment"><span class="dot"></span> Payment</span>
+    <span class="step-dot" id="stepConfirm"><span class="dot"></span> Confirmation</span>
+  </div>
+
+  <!-- STEP 1: Results -->
+  <section id="resultsSection" class="section hidden no-reveal">
+    <h3 class="mb-16">Available Flights</h3>
+    <div class="route-map-wrap" id="flightRouteMap" style="display:none;"></div>
+    <div id="flightResults"></div>
+  </section>
+
+  <!-- STEP 2: Flight Detail (Live status, price history, reviews) -->
+  <section id="flightDetailPanel" class="section hidden no-reveal">
+    <button class="btn btn-outline btn-sm mb-16" onclick="backToResults()">&larr; Back to results</button>
+    <div class="card">
+      <div class="flex-between" style="align-items:flex-start; flex-wrap:wrap; gap:16px;">
+        <div>
+          <h3 class="mb-8" id="flightDetailTitle"></h3>
+          <p class="muted" id="flightDetailMeta"></p>
+        </div>
+        <div style="display:flex; gap:8px; flex-wrap:wrap;">
+          <button class="btn btn-outline btn-sm" onclick="refreshLiveStatus()">🔄 Refresh Status</button>
+          <button class="btn btn-outline btn-sm" onclick="trackFlight()">📍 Track Flight</button>
+          <button class="btn btn-outline btn-sm" onclick="showPriceHistory()">📈 Price History</button>
+        </div>
+      </div>
+
+      <!-- Live status -->
+      <div id="liveStatusBox" class="mt-16" style="background:var(--bg); border-radius:10px; padding:14px 16px;"></div>
+
+      <!-- Price history chart -->
+      <div id="priceHistoryChart" class="hidden mt-16">
+        <h4 class="mb-8" style="font-size:15px;">Price History</h4>
+        <canvas id="priceChartCanvas" style="width:100%; height:200px;"></canvas>
+        <p class="muted" style="font-size:13px;"></p>
+      </div>
+
+      <div class="mt-24">
+        <button class="btn btn-primary" onclick="proceedFromFlightDetail()">Continue to Passenger Details</button>
+      </div>
+    </div>
+
+    <!-- Reviews -->
+    <div class="card mt-16">
+      <div class="flex-between" style="align-items:center;">
+        <h4 class="mb-8" style="font-size:16px;">Reviews</h4>
+        <select id="reviewSort" style="padding:6px 10px; border-radius:8px; border:1.5px solid var(--border); font-size:13px;" onchange="loadFlightReviews()">
+          <option value="newest">Newest</option>
+          <option value="highest">Highest Rating</option>
+          <option value="lowest">Lowest Rating</option>
+        </select>
+      </div>
+      <p class="muted" id="reviewsCount"></p>
+      <div id="reviewsList" class="mt-8"></div>
+      <button class="btn btn-outline btn-sm mt-16" onclick="showReviewForm()">✍️ Write a Review</button>
+
+      <div id="reviewFormSection" class="hidden mt-16">
+        <h4 class="mb-8" style="font-size:15px;">Write a Review</h4>
+        <div class="form-group">
+          <label>Rating</label>
+          <div class="star-rating">
+            <label><input type="radio" name="reviewRating" value="1"> 1</label>
+            <label><input type="radio" name="reviewRating" value="2"> 2</label>
+            <label><input type="radio" name="reviewRating" value="3"> 3</label>
+            <label><input type="radio" name="reviewRating" value="4"> 4</label>
+            <label><input type="radio" name="reviewRating" value="5"> 5</label>
+          </div>
+        </div>
+        <div class="form-group"><label>Comment</label><textarea id="reviewComment" rows="3" style="width:100%; padding:10px 12px; border-radius:8px; border:1.5px solid var(--border); font-size:13px;"></textarea></div>
+        <div class="form-group"><label>Photo URLs (optional)</label><input type="text" id="reviewPhotos" placeholder="Comma-separated image URLs"></div>
+        <div class="flex gap-8">
+          <button class="btn btn-primary btn-sm" onclick="submitFlightReview()">Submit Review</button>
+          <button class="btn btn-outline btn-sm" onclick="closeReviewForm()">Cancel</button>
+        </div>
+        <p class="error-text" id="reviewMsg"></p>
+      </div>
+    </div>
+  </section>
+
+  <!-- STEP 3: Passenger + Captcha + Coupon -->
+  <section id="passengerSection" class="section hidden no-reveal">
+    <button class="btn btn-outline btn-sm mb-16" onclick="backToResults()">&larr; Back to results</button>
+    <div class="grid grid-2" style="align-items:start;">
+      <div class="card">
+        <h4 class="mb-16">Passenger Details</h4>
+        <div class="form-group"><label>Full Name</label><input type="text" id="passengerName" required></div>
+        <div class="form-group"><label>Age</label><input type="number" id="passengerAge" required></div>
+        <div class="form-group"><label>Gender</label>
+          <select id="passengerGender"><option>Male</option><option>Female</option><option>Other</option></select>
+        </div>
+        <div class="form-group"><label>Caption / Special Note (optional)</label><input type="text" id="caption" placeholder="e.g. Vegetarian meal"></div>
+
+        <div class="form-group"><label>Coupon Code</label>
+          <div class="flex gap-8"><input type="text" id="couponCode" placeholder="e.g. WELCOME10"><button class="btn btn-outline" type="button" onclick="applyCoupon()">Apply</button></div>
+          <p class="success-text" id="couponMsg"></p>
+        </div>
+      </div>
+      <div class="summary-box">
+        <h4 class="mb-16">Fare Summary</h4>
+        <div class="summary-row"><span>Base fare</span><span id="sumBase">₹0</span></div>
+        <div class="summary-row"><span>Discount</span><span id="sumDiscount">-₹0</span></div>
+        <div class="summary-row total"><span>Total Payable</span><span id="sumTotal">₹0</span></div>
+        <button class="btn btn-primary btn-block mt-16" onclick="proceedToPayment()">Proceed to Payment</button>
+        <p class="error-text" id="passengerErr"></p>
+      </div>
+    </div>
+  </section>
+
+  <!-- STEP 3: Payment Methods -->
+  <section id="paymentSection" class="section hidden no-reveal">
+    <button class="btn btn-outline btn-sm mb-16" onclick="backToPassenger()">&larr; Back to details</button>
+    <div class="grid grid-2" style="align-items:start;">
+      <div id="paymentMethodsContainer"></div>
+      <div class="summary-box">
+        <h4 class="mb-16">Booking Summary</h4>
+        <div class="summary-row"><span>Flight</span><span id="payFlightInfo">—</span></div>
+        <div class="summary-row"><span>Base fare</span><span id="payBase">₹0</span></div>
+        <div class="summary-row"><span>Discount</span><span id="payDiscount">-₹0</span></div>
+        <div class="summary-row total"><span>Total Payable</span><span id="payTotal">₹0</span></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- STEP 4: Confirmation -->
+  <section id="confirmSection" class="section hidden text-center no-reveal">
+    <div class="card" style="max-width:480px; margin:0 auto;">
+      <h3 style="color:var(--success);">✅ Booking Confirmed!</h3>
+      <p class="muted mt-8" id="confirmMsg"></p>
+      <div class="muted mt-16" id="paymentReceipt" style="font-size:13px;"></div>
+      <a href="profile.html" class="btn btn-primary mt-16">View My Bookings</a>
+    </div>
+  </section>
+</div>
+
+<!-- MISSION: Begin the Journey. -->
+<section class="mission-section">
+  <div class="mission-grid-bg"></div>
+  <div class="mission-inner">
+    <span class="mission-eyebrow">Our Mission</span>
+    <h2 class="mission-title">Begin the <span class="grad">Journey.</span></h2>
+    <p class="mission-text">From finding the best bus routes to booking flights, reserving hotels, or renting a car, <strong>TripWithUs</strong> brings everything together on one easy-to-use platform. Our mission is to make travel planning effortless so you can enjoy every moment of your journey.</p>
+    <p class="mission-text"><strong>TripWithUs</strong> helps you compare and book buses, trains, flights, rental cars, and hotels—all in one place. Enjoy secure bookings, competitive prices, and a hassle-free travel experience every time.</p>
+    <div class="mission-icons">
+      <div class="mission-icon" title="Buses">🚌</div>
+      <div class="mission-icon" title="Trains">🚆</div>
+      <div class="mission-icon" title="Flights">✈️</div>
+      <div class="mission-icon" title="Cars">🚗</div>
+      <div class="mission-icon" title="Hotels">🏨</div>
+    </div>
+  </div>
+</section>
+
+<footer id="siteFooter"></footer>
+
+<script src="js/api.js"></script>
+<script src="js/mock-api.js"></script>
+<script src="js/common.js"></script>
+<script src="js/flight.js"></script>
+<script>requireAuth();</script>
+</body>
+</html>

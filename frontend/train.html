@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TripWithUs — Train Booking | IRCTC Partner</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Playfair+Display:wght@600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body data-active="train.html">
+<nav class="navbar" id="siteNavbar"></nav>
+
+<header class="hero">
+  <div class="container">
+    <span class="eyebrow">🚆 Train Booking</span>
+    <h1 style="font-size:32px;">Book train tickets across India</h1>
+    <div style="display:flex; gap:24px; flex-wrap:wrap; margin-top:16px; max-width:600px;">
+      <span style="display:flex; align-items:center; gap:6px; font-size:14px; color:var(--muted);">🇮🇳 IRCTC Authorized Partner</span>
+      <span style="display:flex; align-items:center; gap:6px; font-size:14px; color:var(--muted);">🛏️ AC, Sleeper &amp; Chair Car</span>
+      <span style="display:flex; align-items:center; gap:6px; font-size:14px; color:var(--muted);">🎫 Instant e-Ticket &amp; Cancellation</span>
+    </div>
+  </div>
+</header>
+
+<div class="container">
+  <div class="search-card">
+    <form class="search-form" id="searchForm">
+      <div class="field"><label>From</label><input type="text" id="fromCity" placeholder="FROM" required></div>
+      <div class="field"><label>To</label><input type="text" id="toCity" placeholder="TO" required></div>
+      <div class="field"><label>Travel Date</label><input type="date" id="travelDate" required></div>
+      <div class="field" style="align-self:end;"><button class="btn btn-primary btn-block" type="submit">Search Trains</button></div>
+    </form>
+  </div>
+
+  <!-- Steps indicator -->
+  <div class="steps-indicator" id="stepsIndicator">
+    <span class="step-dot completed"><span class="dot"></span> Search</span>
+    <span class="step-dot" id="stepPassenger"><span class="dot"></span> Passenger Details</span>
+    <span class="step-dot" id="stepPayment"><span class="dot"></span> Payment</span>
+    <span class="step-dot" id="stepConfirm"><span class="dot"></span> Confirmation</span>
+  </div>
+
+  <!-- STEP 1: Results -->
+  <section id="resultsSection" class="section hidden no-reveal">
+    <h3 class="mb-16">Available Trains</h3>
+    <div class="route-map-wrap" id="trainRouteMap" style="display:none;"></div>
+    <div id="trainResults"></div>
+  </section>
+
+  <!-- STEP 2: Passenger + Captcha + Coupon -->
+  <section id="passengerSection" class="section hidden no-reveal">
+    <button class="btn btn-outline btn-sm mb-16" onclick="backToResults()">&larr; Back to results</button>
+    <div class="grid grid-2" style="align-items:start;">
+      <div class="card">
+        <h4 class="mb-16">Passenger Details</h4>
+        <div class="form-group"><label>Full Name</label><input type="text" id="passengerName" required></div>
+        <div class="form-group"><label>Age</label><input type="number" id="passengerAge" required></div>
+        <div class="form-group"><label>Gender</label>
+          <select id="passengerGender"><option>Male</option><option>Female</option><option>Other</option></select>
+        </div>
+        <div class="form-group"><label>Caption / Special Note (optional)</label><input type="text" id="caption" placeholder="e.g. Lower berth preferred"></div>
+        <div class="form-group"><label>Coupon Code</label>
+          <div class="flex gap-8"><input type="text" id="couponCode" placeholder="e.g. WELCOME10"><button class="btn btn-outline" type="button" onclick="applyCoupon()">Apply</button></div>
+          <p class="success-text" id="couponMsg"></p>
+        </div>
+      </div>
+      <div class="summary-box">
+        <h4 class="mb-16">Fare Summary</h4>
+        <div class="summary-row"><span>Base fare</span><span id="sumBase">₹0</span></div>
+        <div class="summary-row"><span>Discount</span><span id="sumDiscount">-₹0</span></div>
+        <div class="summary-row total"><span>Total Payable</span><span id="sumTotal">₹0</span></div>
+        <button class="btn btn-primary btn-block mt-16" onclick="proceedToPayment()">Proceed to Payment</button>
+        <p class="error-text" id="passengerErr"></p>
+      </div>
+    </div>
+  </section>
+
+  <!-- STEP 3: Payment Methods -->
+  <section id="paymentSection" class="section hidden no-reveal">
+    <button class="btn btn-outline btn-sm mb-16" onclick="backToPassenger()">&larr; Back to details</button>
+    <div class="grid grid-2" style="align-items:start;">
+      <div id="paymentMethodsContainer"></div>
+      <div class="summary-box">
+        <h4 class="mb-16">Booking Summary</h4>
+        <div class="summary-row"><span>Train</span><span id="payTrainInfo">—</span></div>
+        <div class="summary-row"><span>Base fare</span><span id="payBase">₹0</span></div>
+        <div class="summary-row"><span>Discount</span><span id="payDiscount">-₹0</span></div>
+        <div class="summary-row total"><span>Total Payable</span><span id="payTotal">₹0</span></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- STEP 4: Confirmation -->
+  <section id="confirmSection" class="section hidden text-center no-reveal">
+    <div class="card" style="max-width:480px; margin:0 auto;">
+      <h3 style="color:var(--success);">✅ Booking Confirmed!</h3>
+      <p class="muted mt-8" id="confirmMsg"></p>
+      <div class="muted mt-16" id="paymentReceipt" style="font-size:13px;"></div>
+      <a href="profile.html" class="btn btn-primary mt-16">View My Bookings</a>
+    </div>
+  </section>
+</div>
+
+<!-- MISSION: Begin the Journey. -->
+<section class="mission-section">
+  <div class="mission-grid-bg"></div>
+  <div class="mission-inner">
+    <span class="mission-eyebrow">Our Mission</span>
+    <h2 class="mission-title">Begin the <span class="grad">Journey.</span></h2>
+    <p class="mission-text">From finding the best bus routes to booking flights, reserving hotels, or renting a car, <strong>TripWithUs</strong> brings everything together on one easy-to-use platform. Our mission is to make travel planning effortless so you can enjoy every moment of your journey.</p>
+    <p class="mission-text"><strong>TripWithUs</strong> helps you compare and book buses, trains, flights, rental cars, and hotels—all in one place. Enjoy secure bookings, competitive prices, and a hassle-free travel experience every time.</p>
+    <div class="mission-icons">
+      <div class="mission-icon" title="Buses">🚌</div>
+      <div class="mission-icon" title="Trains">🚆</div>
+      <div class="mission-icon" title="Flights">✈️</div>
+      <div class="mission-icon" title="Cars">🚗</div>
+      <div class="mission-icon" title="Hotels">🏨</div>
+    </div>
+  </div>
+</section>
+
+<footer id="siteFooter"></footer>
+
+<script src="js/api.js"></script>
+<script src="js/mock-api.js"></script>
+<script src="js/common.js"></script>
+<script src="js/train.js"></script>
+<script>requireAuth();</script>
+</body>
+</html>

@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TripWithUs — Create Account | Pack Your Bags, We'll Handle the Rest</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<div class="auth-shell">
+  <div class="auth-card">
+    <div class="logo"><span class="logo-pin">◎</span>TripWithUs</div>
+    <p class="auth-sub">Create your account and pack your bags</p>
+
+    <form id="signupForm">
+      <div class="form-group">
+        <label>Full Name</label>
+        <input type="text" id="name" required>
+      </div>
+      <div class="form-group">
+        <label>Age</label>
+        <input type="number" id="age" min="1" max="120">
+      </div>
+      <div class="form-group">
+        <label>Mobile Number</label>
+        <input type="text" id="mobileNumber" required>
+      </div>
+      <div class="form-group">
+        <label>Email</label>
+        <input type="email" id="email" required>
+      </div>
+      <div class="form-group">
+        <label>Location</label>
+        <input type="text" id="location" placeholder="City">
+      </div>
+      <div class="form-group">
+        <label>Password</label>
+        <div class="password-wrap">
+          <input type="password" id="password" required minlength="6">
+          <button type="button" class="password-toggle" id="togglePassword" aria-label="Show password">
+            <span class="eye" aria-hidden="true">👁️</span>
+            <span class="eye-off" aria-hidden="true">🙈</span>
+          </button>
+        </div>
+      </div>
+      <button type="submit" class="btn btn-primary btn-block">Create Account</button>
+      <p class="error-text" id="errText"></p>
+    </form>
+
+    <p class="auth-switch">Already had an Account? <a href="index.html">Login</a></p>
+  </div>
+</div>
+
+<script src="js/api.js"></script>
+<script src="js/mock-api.js"></script>
+<script src="js/common.js"></script>
+<script>
+// Password show/hide toggle
+(function() {
+  var toggle = document.getElementById('togglePassword');
+  var pw = document.getElementById('password');
+  if (toggle && pw) {
+    toggle.addEventListener('click', function() {
+      var isHidden = pw.type === 'password';
+      pw.type = isHidden ? 'text' : 'password';
+      toggle.classList.toggle('hide', !isHidden);
+      toggle.setAttribute('aria-label', isHidden ? 'Hide password' : 'Show password');
+      pw.focus();
+    });
+  }
+})();
+
+document.getElementById('signupForm').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const errEl = document.getElementById('errText');
+  errEl.style.display = 'none';
+  try {
+    const auth = await post('/auth/signup', {
+      name: document.getElementById('name').value.trim(),
+      age: Number(document.getElementById('age').value) || null,
+      mobileNumber: document.getElementById('mobileNumber').value.trim(),
+      email: document.getElementById('email').value.trim(),
+      location: document.getElementById('location').value.trim(),
+      password: document.getElementById('password').value
+    });
+    // Ensure full profile details are persisted locally for this logged-in user
+    if (!auth.email) auth.email = document.getElementById('email').value.trim();
+    if (!auth.age) auth.age = Number(document.getElementById('age').value) || null;
+    if (!auth.location) auth.location = document.getElementById('location').value.trim();
+    if (!auth.mobileNumber) auth.mobileNumber = document.getElementById('mobileNumber').value.trim();
+    saveSession(auth);
+    window.location.href = 'home.html';
+  } catch (err) {
+    errEl.textContent = err.message;
+    errEl.style.display = 'block';
+  }
+});
+</script>
+</body>
+</html>

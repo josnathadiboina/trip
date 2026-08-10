@@ -1,0 +1,274 @@
+let selectedBus = null;
+let selectedSeats = [];
+let seatPriceExtra = 0;
+let discountAmount = 0;
+let appliedCouponCode = null;
+let totalAmount = 0;
+
+function updateSteps(active) {
+  const steps = ['stepSeats', 'stepPassenger', 'stepPayment', 'stepConfirm'];
+  const map = { seats: 0, passenger: 1, payment: 2, confirm: 3 };
+  const idx = map[active] ?? -1;
+  steps.forEach((id, i) => {
+    const el = document.getElementById(id);
+    if (!el) return;
+    el.classList.remove('active', 'completed');
+    if (i < idx) el.classList.add('completed');
+    else if (i === idx) el.classList.add('active');
+  });
+}
+
+document.getElementById('searchForm').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const from = document.getElementById('fromCity').value.trim();
+  const to = document.getElementById('toCity').value.trim();
+  const date = document.getElementById('travelDate').value;
+
+const el = document.getElementById('busResults');
+  el.innerHTML = renderLoading('Searching for buses', 'Checking live seat availability and prices');
+  startLoadingDots();
+  document.getElementById('resultsSection').classList.remove('hidden');
+  document.getElementById('seatSection').classList.add('hidden');
+  document.getElementById('passengerSection').classList.add('hidden');
+  document.getElementById('paymentSection').classList.add('hidden');
+
+  // UNIQUE: show route map from source → destination
+  const mapWrap = document.getElementById('busRouteMap');
+  if (mapWrap) {
+    mapWrap.style.display = 'block';
+    renderRouteMap(from, to, 'busRouteMap');
+  }
+
+  try {
+    const buses = await get(`/search/buses?from=${encodeURIComponent(from)}&to=${encodeURIComponent(to)}&date=${date}`);
+    stopLoadingDots();
+    renderBuses(buses);
+  } catch (err) {
+    stopLoadingDots();
+    el.innerHTML = `<p class="error-text" style="display:block;">${err.message}</p>`;
+  }
+});
+
+function renderBuses(buses) {
+  const el = document.getElementById('busResults');
+  if (!buses.length) {
+    el.innerHTML = renderNoResults('No buses found for this route/date. Try Delhi → Jaipur.');
+    return;
+  }
+  const bgImg = 'https://images.unsplash.com/photo-1544620347-c4fd4a3d5957?w=400&q=80';
+  el.innerHTML = buses.map(b => {
+    const safeJson = JSON.stringify(b).replace(/'/g, "\\'").replace(/"/g, '"');
+    return `<div class="result-item tilt-3d" style="position:relative; overflow:hidden; background:linear-gradient(135deg, rgba(255,255,255,0.92) 0%, rgba(255,255,255,0.88) 100%);">
+      <div style="position:absolute; inset:0; opacity:0.08; background:url('${bgImg}') center/cover; z-index:0; pointer-events:none;"></div>
+      <div style="position:relative; z-index:1; display:flex; align-items:center; justify-content:space-between; gap:20px; flex-wrap:wrap; width:100%;">
+        <div class="result-main">
+          <div>
+            <div class="result-name">🚌 ${b.operatorName}</div>
+            <div class="result-meta">${b.busType} · ★ ${b.rating}</div>
+          </div>
+          <div class="time-block"><div class="time">${formatTime12h(b.departureTime)}</div><div class="city">${b.fromCity}</div></div>
+          <div class="arrow">→</div>
+          <div class="time-block"><div class="time">${formatTime12h(b.arrivalTime)}</div><div class="city">${b.toCity}</div></div>
+        </div>
+        <div class="price-block">
+          <div class="amt">${fmtCurrency(b.currentPrice)}</div>
+          <div class="seats ${b.availableSeats < 10 ? 'low' : ''}">${b.availableSeats} seats left</div>
+          <button class="btn btn-primary btn-sm mt-8" onclick='selectBus(${safeJson})'>Select Seats</button>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+async function selectBus(bus) {
+  selectedBus = bus;
+  selectedSeats = [];
+  discountAmount = 0;
+  appliedCouponCode = null;
+  document.getElementById('resultsSection').classList.add('hidden');
+  document.getElementById('seatSection').classList.remove('hidden');
+  document.getElementById('seatBusTitle').textContent = `${bus.operatorName} — ${bus.fromCity} to ${bus.toCity}`;
+  document.getElementById('seatBusMeta').textContent = `${bus.travelDate} · Departs ${bus.departureTime} · ${bus.busType}`;
+  updateSteps('seats');
+
+  const seatMap = document.getElementById('seatMap');
+  seatMap.innerHTML = '<div class="loader">Loading seat map...</div>';
+  const seats = await get(`/buses/${bus.id}/seats`);
+  seatMap.innerHTML = '';
+  seats.forEach(s => {
+    const btn = document.createElement('button');
+    btn.className = 'seat' + (s.booked ? ' booked' : s.seatClass === 'Premium' ? ' premium' : '');
+    btn.textContent = s.seatNumber;
+    btn.disabled = s.booked;
+    btn.onclick = () => toggleSeat(s, btn);
+    seatMap.appendChild(btn);
+  });
+  updateSeatSummary();
+}
+
+function toggleSeat(seat, btn) {
+  const idx = selectedSeats.findIndex(s => s.seatNumber === seat.seatNumber);
+  if (idx >= 0) {
+    selectedSeats.splice(idx, 1);
+    btn.classList.remove('selected');
+    if (seat.seatClass === 'Premium') btn.classList.add('premium');
+  } else {
+    selectedSeats.push(seat);
+    btn.classList.remove('premium');
+    btn.classList.add('selected');
+  }
+  updateSeatSummary();
+}
+
+function updateSeatSummary() {
+  document.getElementById('selectedSeatsLabel').textContent =
+    selectedSeats.length + ' seat(s) selected: ' + selectedSeats.map(s => s.seatNumber).join(', ');
+  document.getElementById('proceedToPassengerBtn').disabled = selectedSeats.length === 0;
+  seatPriceExtra = selectedSeats.reduce((sum, s) => sum + (s.priceDelta || 0), 0);
+}
+
+function backToResults() {
+  document.getElementById('seatSection').classList.add('hidden');
+  document.getElementById('resultsSection').classList.remove('hidden');
+}
+
+function backToSeats() {
+  document.getElementById('passengerSection').classList.add('hidden');
+  document.getElementById('seatSection').classList.remove('hidden');
+  updateSteps('seats');
+}
+
+function showPassengerStep() {
+  document.getElementById('seatSection').classList.add('hidden');
+  document.getElementById('passengerSection').classList.remove('hidden');
+  refreshSummary();
+  updateSteps('passenger');
+}
+
+function backToPassenger() {
+  document.getElementById('paymentSection').classList.add('hidden');
+  document.getElementById('passengerSection').classList.remove('hidden');
+  updateSteps('passenger');
+}
+
+function refreshSummary() {
+  const base = (selectedBus.currentPrice * selectedSeats.length) + seatPriceExtra;
+  totalAmount = Math.max(0, base - discountAmount);
+  document.getElementById('sumBase').textContent = fmtCurrency(base);
+  document.getElementById('sumDiscount').textContent = '-' + fmtCurrency(discountAmount);
+  document.getElementById('sumTotal').textContent = fmtCurrency(totalAmount);
+}
+
+async function applyCoupon() {
+  const code = document.getElementById('couponCode').value.trim();
+  const msg = document.getElementById('couponMsg');
+  if (!code) return;
+  try {
+    const coupon = await post(`/coupons/validate/${code}`);
+    const base = (selectedBus.currentPrice * selectedSeats.length) + seatPriceExtra;
+    discountAmount = base * (coupon.discountPercent / 100);
+    appliedCouponCode = code;
+    msg.textContent = `Coupon applied: ${coupon.discountPercent}% off`;
+    msg.style.display = 'block';
+    refreshSummary();
+  } catch (err) {
+    msg.style.display = 'block';
+    msg.style.color = 'var(--danger)';
+    msg.textContent = err.message;
+  }
+}
+
+function proceedToPayment() {
+  const errEl = document.getElementById('passengerErr');
+  errEl.style.display = 'none';
+
+  const name = document.getElementById('passengerName').value.trim();
+  const age = document.getElementById('passengerAge').value;
+  if (!name || !age) {
+    errEl.textContent = 'Please fill in passenger details';
+    errEl.style.display = 'block';
+    return;
+  }
+
+  const code = document.getElementById('couponCode').value.trim();
+  if (code && !appliedCouponCode) {
+    errEl.textContent = 'Please click "Apply" to validate your coupon code first.';
+    errEl.style.display = 'block';
+    return;
+  }
+
+  document.getElementById('passengerSection').classList.add('hidden');
+  document.getElementById('paymentSection').classList.remove('hidden');
+  updateSteps('payment');
+
+  const base = (selectedBus.currentPrice * selectedSeats.length) + seatPriceExtra;
+  document.getElementById('payBusInfo').textContent = `${selectedBus.operatorName} · ${selectedBus.fromCity} → ${selectedBus.toCity}`;
+  document.getElementById('paySeats').textContent = selectedSeats.map(s => s.seatNumber).join(', ');
+  document.getElementById('payBase').textContent = fmtCurrency(base);
+  document.getElementById('payDiscount').textContent = '-' + fmtCurrency(discountAmount);
+  document.getElementById('payTotal').textContent = fmtCurrency(totalAmount);
+
+  renderPaymentMethods('paymentMethodsContainer');
+  document.getElementById('paymentAmountLabel').textContent = fmtCurrency(totalAmount);
+}
+
+document.addEventListener('paymentComplete', async (e) => {
+  await confirmBooking(e.detail);
+});
+
+async function confirmBooking(paymentInfo) {
+  const name = document.getElementById('passengerName').value.trim();
+  const age = document.getElementById('passengerAge').value;
+
+  try {
+    const booking = await post('/bookings', {
+      bookingType: 'BUS',
+      referenceId: selectedBus.id,
+      fromLocation: selectedBus.fromCity,
+      toLocation: selectedBus.toCity,
+      travelDate: selectedBus.travelDate,
+      seatNumbers: selectedSeats.map(s => s.seatNumber).join(','),
+      passengerCount: selectedSeats.length,
+      passengerDetails: JSON.stringify({
+        name, age,
+        gender: document.getElementById('passengerGender').value,
+        caption: document.getElementById('caption').value
+      }),
+      couponCode: appliedCouponCode
+    });
+
+    document.getElementById('paymentSection').classList.add('hidden');
+    document.getElementById('confirmSection').classList.remove('hidden');
+    updateSteps('confirm');
+
+    document.getElementById('confirmMsg').textContent =
+      `Booking #${booking.id} confirmed for ${fmtCurrency(booking.finalAmount)}. Seats: ${booking.seatNumbers}`;
+
+    document.getElementById('paymentReceipt').innerHTML = `
+      <strong>Payment Receipt</strong><br>
+      Method: ${paymentInfo.method}<br>
+      ${paymentInfo.method === 'UPI' ? 'UPI ID: ' : paymentInfo.method === 'Card' ? 'Card: ****' + paymentInfo.detail.slice(-4) : 'Ref: '} ${paymentInfo.detail}<br>
+      Amount Paid: ${fmtCurrency(booking.finalAmount)}<br>
+      Status: <span style="color:var(--success);font-weight:600;">Paid ✓</span>`;
+
+    if (window.showTicket3D) {
+      setTimeout(() => {
+        window.showTicket3D({
+          type: 'BUS', bookingId: booking.id, name: name,
+          from: selectedBus.fromCity, to: selectedBus.toCity,
+          date: selectedBus.travelDate, amount: booking.finalAmount,
+          transport: selectedBus.operatorName,
+          seats: selectedSeats.map(s => s.seatNumber).join(', '),
+          method: paymentInfo.method
+        });
+      }, 500);
+    }
+  } catch (err) {
+    document.getElementById('paymentSection').classList.add('hidden');
+    document.getElementById('passengerSection').classList.remove('hidden');
+    const errEl = document.getElementById('passengerErr');
+    errEl.textContent = 'Booking failed: ' + err.message;
+    errEl.style.display = 'block';
+    updateSteps('passenger');
+  }
+}

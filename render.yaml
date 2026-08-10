@@ -1,0 +1,69 @@
+# ============================================================
+# TripWithUs — Render Deployment
+# ============================================================
+services:
+  # --------------------
+  # 1. Backend API (Spring Boot)
+  # --------------------
+  - type: web
+    name: tripwithus-backend
+    runtime: java
+    region: oregon
+    plan: free
+    healthCheckPath: /api/auth/ping # A simple unauthenticated endpoint
+    envVars:
+      - key: DB_URL
+        fromDatabase:
+          name: tripwithus-db
+          property: connectionString
+      - key: DB_USERNAME
+        fromDatabase:
+          name: tripwithus-db
+          property: user
+      - key: DB_PASSWORD
+        fromDatabase:
+          name: tripwithus-db
+          property: password
+      - key: JWT_SECRET
+        generateValue: true # Render will generate a secure random string
+      - key: ADMIN_USERNAME
+        value: joo
+      - key: ADMIN_PASSWORD
+        sync: false # Prevent this from being exposed in logs
+      - key: SERVER_PORT
+        value: 10000 # Render's required port for Java apps
+    buildCommand: "cd backend && mvn clean install -DskipTests"
+    startCommand: "java -jar backend/target/trip-with-us-1.0.0.jar"
+
+  # --------------------
+  # 2. Frontend (Static Site)
+  # --------------------
+  - type: static
+    name: tripwithus-frontend
+    region: oregon
+    plan: free
+    buildFilter:
+      paths:
+      - frontend/**
+    buildCommand: "sed -i 's|__RENDER_API_BASE__|'\"$TRIPWITHUS_API_BASE\"'|g' frontend/js/api.js"
+    publishPath: "./frontend"
+    routes:
+      - type: rewrite
+        source: "/*"
+        destination: "/index.html"
+    envVars:
+      - key: TRIPWITHUS_API_BASE
+        fromService:
+          type: web
+          name: tripwithus-backend
+          property: url
+          
+# --------------------
+# 3. Database (PostgreSQL)
+# --------------------
+databases:
+  - name: tripwithus-db
+    databaseName: tripwithus
+    user: tripwithus_user
+    plan: free
+    region: oregon
