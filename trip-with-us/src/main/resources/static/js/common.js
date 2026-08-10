@@ -222,8 +222,8 @@ function initMouseParallax3D() {
       var y = e.clientY - rect.top;
       var centerX = rect.width / 2;
       var centerY = rect.height / 2;
-      var rotateX = ((y - centerY) / centerY) * -5;
-      var rotateY = ((x - centerX) / centerX) * 5;
+      var rotateX = ((y - centerY) / centerY) * -4; // Reduced from -5 to -4
+      var rotateY = ((x - centerX) / centerX) * 4; // Reduced from 5 to 4
       el.style.transform = 'perspective(800px) rotateX(' + rotateX + 'deg) rotateY(' + rotateY + 'deg) translateZ(10px)';
       el.style.transition = 'transform 0.1s ease-out';
     });
@@ -254,8 +254,8 @@ function initMagneticButtons() {
       var rect = btn.getBoundingClientRect();
       var relX = e.clientX - rect.left - rect.width / 2;
       var relY = e.clientY - rect.top - rect.height / 2;
-      var pull = Math.min(8, Math.max(-8, relX * 0.2));
-      var pullY = Math.min(5, Math.max(-5, relY * 0.2));
+      var pull = Math.min(6, Math.max(-6, relX * 0.15)); // Reduced pull strength
+      var pullY = Math.min(4, Math.max(-4, relY * 0.15)); // Reduced pull strength
       btn.style.transform = 'translate(' + pull + 'px, ' + pullY + 'px) translateZ(12px)';
       btn.style.transition = 'transform 0.15s ease-out';
     });
@@ -295,6 +295,7 @@ function initFloatingParticles() {
   document.body.appendChild(container);
 
   var colors = ['rgba(255,107,74,0.5)', 'rgba(255,183,76,0.5)', 'rgba(22,48,92,0.45)', 'rgba(255,255,255,0.5)'];
+  var newColors = ['rgba(217, 70, 239, 0.4)', 'rgba(34, 211, 238, 0.4)', 'rgba(90, 58, 138, 0.4)', 'rgba(255,255,255,0.5)'];
   var count = 18;
   for (var i = 0; i < count; i++) {
     var p = document.createElement('div');
@@ -305,8 +306,8 @@ function initFloatingParticles() {
     var delay = -Math.random() * dur;
     var sway = (Math.random() * 60 - 30).toFixed(0) + 'px';
     p.style.cssText = 'width:' + size + 'px;height:' + size + 'px;left:' + left + '%;' +
-      'background:radial-gradient(circle at 30% 30%, rgba(255,255,255,0.6), ' + colors[i % colors.length] + ' 60%, transparent);' +
-      'box-shadow:inset 0 0 8px rgba(255,255,255,0.3), 0 0 14px ' + colors[i % colors.length] + ';' +
+      'background:radial-gradient(circle at 30% 30%, rgba(255,255,255,0.6), ' + newColors[i % newColors.length] + ' 60%, transparent);' +
+      'box-shadow:inset 0 0 8px rgba(255,255,255,0.3), 0 0 14px ' + newColors[i % newColors.length] + ';' +
       'border:1px solid rgba(255,255,255,0.25);' +
       '--dur:' + dur + 's;--sway:' + sway + ';animation-delay:' + delay + 's;';
     container.appendChild(p);
@@ -325,9 +326,9 @@ function initHero3D() {
 
     // Floating orbs
     var orbs = [
-      { size: 200, top: '12%', left: '8%', color: 'rgba(255,107,74,0.16)' },
-      { size: 150, top: '18%', right: '12%', color: 'rgba(255,183,76,0.14)' },
-      { size: 90, top: '60%', left: '22%', color: 'rgba(255,255,255,0.10)' }
+      { size: 200, top: '12%', left: '8%', color: 'rgba(217, 70, 239, 0.16)' }, // Magenta
+      { size: 150, top: '18%', right: '12%', color: 'rgba(34, 211, 238, 0.14)' }, // Cyan
+      { size: 90, top: '60%', left: '22%', color: 'rgba(255,255,255,0.10)' } // White
     ];
     orbs.forEach(function(orb, idx) {
       var div = document.createElement('div');
