@@ -1,0 +1,16 @@
+target/
+*.class
+.idea/
+*.iml
+.vscode/
+.DS_Store
+
+# Environment variables (contains credentials - never commit)
+.env
+.env.local
+.env.*.local
+
+# Maven wrapper's downloaded build runtime cache (kept out of VCS)
+# NOTE: mvnw, mvnw.cmd, and .mvn/wrapper/*.properties MUST be committed
+.mvn/wrapper/dists/
+.mvn/timing.properties

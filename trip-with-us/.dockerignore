@@ -1,0 +1,26 @@
+# Build output
+target/
+*.jar
+
+# VCS / IDE
+.git
+.gitignore
+.idea/
+.vscode/
+.settings/
+*.iml
+
+# Logs & temp
+*.log
+apperr.txt
+applog.txt
+apprun.log
+build_lint.txt
+build_output.txt
+FIX_PLAN.md
+
+# Environment/secrets (never send to image)
+.env
+.env.*.local
+
+# Local helper scripts

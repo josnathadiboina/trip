@@ -1,0 +1,22 @@
+# ---------------------------------------------------------------------------
+# Line-ending normalization.
+#
+# The `mvnw` wrapper shell script MUST stay LF for Docker (Linux) and Vercel
+# (Linux). CRLF line endings would cause "bad interpreter: /bin/sh^M".
+# ---------------------------------------------------------------------------
+* text=auto
+
+# Shell scripts: always LF (required to run in Linux containers / Vercel).
+*.sh     text eol=lf
+mvnw     text eol=lf
+
+# Windows batch/cmd wrappers keep CRLF (required by cmd.exe).
+mvnw.cmd text eol=crlf
+*.cmd    text eol=crlf
+*.bat    text eol=crlf
+*.ps1    text eol=crlf
+
+# Jars / binaries must never be touched.
+*.jar    binary
+*.class  binary
+
