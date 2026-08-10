@@ -26,6 +26,9 @@
             <id>prod</id>
             <properties>
                 <spring.profiles.active>prod</spring.profiles.active>
+                <!-- Set default admin credentials for the production profile -->
+                <app.admin.username>joo</app.admin.username>
+                <app.admin.password>joo@123</app.admin.password>
             </properties>
         </profile>
     </profiles>

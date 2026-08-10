@@ -30,8 +30,8 @@ services:
         value: joo
       - key: ADMIN_PASSWORD
         sync: false # Prevent this from being exposed in logs
-      - key: SERVER_PORT
-        value: 10000 # Render's required port for Java apps
+      - key: PORT
+        value: 10000
     buildCommand: "cd backend && mvn clean install -DskipTests"
     startCommand: "java -jar backend/target/trip-with-us-1.0.0.jar"
 
